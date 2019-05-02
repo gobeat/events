@@ -2,12 +2,12 @@
 
 
 [[projects]]
-  digest = "1:adf423ab5f917e649e55f38ebc561bf700fb64ab2d125eb9e23d4ef20927ee94"
+  digest = "1:6f627c57cb632a2d9f3ea7964aa7753f5aabc7a8a3cebd79e46976fd3fc34d9a"
   name = "gitlab.com/gobeer/errors"
   packages = ["."]
   pruneopts = "UT"
-  revision = "78dc34393820f3e92c1ef33081eb59f7bac6f2d6"
-  version = "v1.0"
+  revision = "9874f78da7f1b9805a04244b57ffd191c586d1fb"
+  version = "v1.1"
 
 [solve-meta]
   analyzer-name = "dep"
