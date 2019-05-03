@@ -2,7 +2,6 @@ package events
 
 import (
 	"fmt"
-	"gitlab.com/gobeer/errors"
 	"testing"
 )
 
@@ -15,7 +14,7 @@ func TestNewEmitter(t *testing.T) {
 
 func TestFactoryEmitter_On(t *testing.T) {
 	e := NewEmitter()
-	e.On("some_name", func(event Event) errors.Error {
+	e.On("some_name", func(event Event) error {
 		return nil
 	})
 }
@@ -30,14 +29,14 @@ func TestFactoryEmitter_Emit_SyncEvent(t *testing.T) {
 	e := NewEmitter()
 	s := "some_message"
 	c := 0
-	e.On(n, func(event Event) errors.Error {
+	e.On(n, func(event Event) error {
 		if event.Payload() != s {
 			t.Errorf("Expects payload is %s", s)
 		}
 		c = 10
 		return nil
 	})
-	e.On(n, func(event Event) errors.Error {
+	e.On(n, func(event Event) error {
 		c = 5
 		return nil
 	})
@@ -52,11 +51,11 @@ func TestFactoryEmitter_Emit_AsyncEvent(t *testing.T) {
 	e := NewEmitter()
 	s := "some_message"
 	c := 0
-	e.On(n, func(event Event) errors.Error {
+	e.On(n, func(event Event) error {
 		c = 10
 		return nil
 	})
-	e.On(n, func(event Event) errors.Error {
+	e.On(n, func(event Event) error {
 		c = 5
 		return nil
 	})

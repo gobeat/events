@@ -1,9 +1,3 @@
-required = ["gitlab.com/gobeer/errors"]
-
-[[constraint]]
-  name = "gitlab.com/gobeer/errors"
-  version = "1.x"
-
 [prune]
   go-tests = true
   unused-packages = true
