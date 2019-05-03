@@ -54,7 +54,7 @@ func (e *factoryEmitter) runAsync(event Event, listeners []Listener) {
 		go func(listener Listener) {
 			defer wg.Done()
 			mutex.Lock()
-			listener(event)
+			_ = listener(event)
 			mutex.Unlock()
 		}(listener)
 	}
