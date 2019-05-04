@@ -1,6 +1,7 @@
 package events
 
 import (
+	"errors"
 	"fmt"
 	"testing"
 )
@@ -40,9 +41,33 @@ func TestFactoryEmitter_Emit_SyncEvent(t *testing.T) {
 		c = 5
 		return nil
 	})
-	e.Emit(NewEvent(n, s))
+	err := e.Emit(NewEvent(n, s))
+	if err != nil {
+		t.Errorf("Expect err is nil. Got %s", err)
+	}
 	if c != 5 {
 		t.Errorf("Expects c = %d", 5)
+	}
+}
+
+func TestFactoryEmitter_Emit_SyncEvent_ReturnError(t *testing.T) {
+	n := "some_event"
+	e := NewEmitter()
+	s := "some_message"
+	c := 0
+	e.On(n, func(event Event) error {
+		return errors.New("something goes wrong")
+	})
+	e.On(n, func(event Event) error {
+		c = 5
+		return nil
+	})
+	err := e.Emit(NewEvent(n, s))
+	if err == nil {
+		t.Error("Expect err is is not nil")
+	}
+	if c != 0 {
+		t.Error("Expects c = 0")
 	}
 }
 
@@ -59,7 +84,10 @@ func TestFactoryEmitter_Emit_AsyncEvent(t *testing.T) {
 		c = 5
 		return nil
 	})
-	e.Emit(NewAsyncEvent(n, s))
+	err := e.Emit(NewAsyncEvent(n, s))
+	if err != nil {
+		t.Errorf("Expect err is nil. Got %s", err)
+	}
 	if c != 5 && c != 10 {
 		t.Errorf("Expects c = %d OR c = %d", 5, 10)
 	} else {

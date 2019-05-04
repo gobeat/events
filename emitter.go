@@ -10,7 +10,7 @@ type Emitter interface {
 	Off(name string) Emitter
 
 	// Fires an event
-	Emit(event Event)
+	Emit(event Event) error
 }
 
 func NewEmitter() Emitter {
@@ -33,20 +33,20 @@ func (e *factoryEmitter) Off(name string) Emitter {
 	return e
 }
 
-func (e *factoryEmitter) Emit(event Event) {
+func (e *factoryEmitter) Emit(event Event) error {
 	listeners, ok := e.listeners[event.Name()]
 	if !ok {
-		return
+		return nil
 	}
 
 	if event.IsAsync() {
-		e.runAsync(event, listeners)
+		return e.runAsync(event, listeners)
 	} else {
-		e.runSync(event, listeners)
+		return e.runSync(event, listeners)
 	}
 }
 
-func (e *factoryEmitter) runAsync(event Event, listeners []Listener) {
+func (e *factoryEmitter) runAsync(event Event, listeners []Listener) error {
 	var wg sync.WaitGroup
 	var mutex = &sync.Mutex{}
 	for _, listener := range listeners {
@@ -59,13 +59,16 @@ func (e *factoryEmitter) runAsync(event Event, listeners []Listener) {
 		}(listener)
 	}
 	wg.Wait()
+	return nil
 }
 
-func (e *factoryEmitter) runSync(event Event, listeners []Listener) {
+func (e *factoryEmitter) runSync(event Event, listeners []Listener) error {
 	for _, listener := range listeners {
 		err := listener(event)
 		if err != nil {
-			panic(err)
+			return err
 		}
 	}
+
+	return nil
 }
