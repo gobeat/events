@@ -94,3 +94,20 @@ func TestFactoryEmitter_Emit_AsyncEvent(t *testing.T) {
 		fmt.Printf("c = %d\n", c)
 	}
 }
+
+func TestFactoryEmitter_Emit_AsyncEvent_WithError(t *testing.T) {
+	n := "some_event"
+	e := NewEmitterWithErrorHandler(func(err error) {
+		if err.Error() != "this is an error" {
+			t.Errorf("Expect err is catched")
+		}
+	})
+	s := "some_message"
+	e.On(n, func(event Event) error {
+		return errors.New("this is an error")
+	})
+	err := e.Emit(NewAsyncEvent(n, s))
+	if err != nil {
+		t.Errorf("Expect err is nil. Got %s", err)
+	}
+}

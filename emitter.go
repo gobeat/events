@@ -1,6 +1,9 @@
 package events
 
-import "sync"
+import (
+	"fmt"
+	"sync"
+)
 
 type Emitter interface {
 	// Subscribe an event listener
@@ -13,14 +16,26 @@ type Emitter interface {
 	Emit(event Event) error
 }
 
+// NewEmitter returns default implementation of Emitter
+// This emitter will use default ErrorHandler
 func NewEmitter() Emitter {
+	return NewEmitterWithErrorHandler(func(err error) {
+		fmt.Println(err)
+	})
+}
+
+// NewEmitterWithErrorHandler returns default implementation of Emitter
+// This function allows to set an instance of ErrorHandler
+func NewEmitterWithErrorHandler(errorHandler ErrorHandler) Emitter {
 	return &factoryEmitter{
-		listeners: make(map[string][]Listener),
+		listeners:    make(map[string][]Listener),
+		errorHandler: errorHandler,
 	}
 }
 
 type factoryEmitter struct {
-	listeners map[string][]Listener
+	listeners    map[string][]Listener
+	errorHandler ErrorHandler
 }
 
 func (e *factoryEmitter) On(name string, listener Listener) Emitter {
@@ -41,9 +56,9 @@ func (e *factoryEmitter) Emit(event Event) error {
 
 	if event.IsAsync() {
 		return e.runAsync(event, listeners)
-	} else {
-		return e.runSync(event, listeners)
 	}
+
+	return e.runSync(event, listeners)
 }
 
 func (e *factoryEmitter) runAsync(event Event, listeners []Listener) error {
@@ -54,7 +69,10 @@ func (e *factoryEmitter) runAsync(event Event, listeners []Listener) error {
 		go func(listener Listener) {
 			defer wg.Done()
 			mutex.Lock()
-			_ = listener(event)
+			err := listener(event)
+			if err != nil && e.errorHandler != nil {
+				e.errorHandler(err)
+			}
 			mutex.Unlock()
 		}(listener)
 	}
